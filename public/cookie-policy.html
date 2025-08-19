@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cookie Policy – ScheduleX</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Page-local polish (matches your legal pages) */
+    .legal-wrap{max-width:980px;margin:80px auto;padding:0 16px;text-align:left}
+    .legal-meta{color:#666;font-size:14px}
+    .legal-wrap h2{margin-top:28px}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo-link">
+      <img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" />
+    </a>
+    <button class="login-btn" id="openModal">Login / Sign Up</button>
+  </header>
+
+  <!-- Main -->
+  <main class="legal-wrap">
+    <h1>Cookie Policy – ScheduleX</h1>
+    <p class="legal-meta"><strong>Effective Date:</strong> August 8, 2025</p>
+
+    <h2>1. Introduction</h2>
+    <p>This Cookie Policy explains how ScheduleX uses cookies and similar technologies to recognize you when you visit our website, understand how you interact with us, and improve your experience.</p>
+
+    <h2>2. What are cookies?</h2>
+    <p>Cookies are small text files stored on your device by your browser. They help websites remember your preferences and improve performance.</p>
+
+    <h2>3. Types of cookies we use</h2>
+    <ul>
+      <li><strong>Essential cookies</strong> – required for core site features (e.g., session, security).</li>
+      <li><strong>Functional cookies</strong> – remember preferences (e.g., saved inputs).</li>
+      <li><strong>Analytics cookies</strong> – help us understand usage to improve the product.</li>
+      <li><strong>Advertising/targeting cookies</strong> (if enabled) – deliver relevant content and measure campaign performance.</li>
+    </ul>
+
+    <h2>4. How we use cookies</h2>
+    <ul>
+      <li>To keep you signed in during a session (essential).</li>
+      <li>To remember simple preferences and improve navigation (functional).</li>
+      <li>To measure site performance and fix issues (analytics).</li>
+      <li>To personalise content/ads where applicable (advertising).</li>
+    </ul>
+
+    <h2>5. Managing cookies</h2>
+    <p>You can control cookies via your browser settings. If you block essential cookies, parts of ScheduleX may not function properly.</p>
+
+    <h2>6. Changes to this policy</h2>
+    <p>We may update this Cookie Policy periodically. We’ll post the latest version on this page with a new effective date.</p>
+
+    <h2>7. Contact us</h2>
+    <p>Questions? Email <strong>privacy@schedulEX.example</strong>.</p>
+
+    <p style="margin-top:28px"><a class="btn" href="index.html">Back to home</a></p>
+  </main>
+
+  <!-- Modal -->
+  <div id="modalBg" class="modal-bg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span id="closeModal" class="close-btn" aria-label="Close">×</span>
+      <div id="loginForm" class="form">
+        <h2 id="authTitle">Login</h2>
+        <input type="text" placeholder="Email or Phone Number" />
+        <input type="password" placeholder="Password" />
+        <button class="sign-in-btn">Sign In</button>
+        <button class="link-btn" id="showSignUp" type="button">Don’t have an account? Sign up</button>
+      </div>
+      <div id="signUpForm" class="form" style="display:none;">
+        <h2>Sign Up</h2>
+        <input type="text" placeholder="First Name" />
+        <input type="text" placeholder="Last Name" />
+        <label>DOB</label>
+        <input type="date" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <input type="password" placeholder="Re-enter Password" />
+        <button class="sign-in-btn">Create Account</button>
+        <button class="link-btn" id="showLogin" type="button">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align:center; padding:40px 20px; color:#666;">
+    © ScheduleX 2025 · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> ·
+    <a href="cookie-policy.html" aria-current="page">Cookies</a> · <a href="status.html">Status</a> · <a href="contact.html">Support</a>
+  </footer>
+
+  <!-- Shared scripts -->
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+/* ===== Base ===== */
+:root {
+  --brand: #56bbd5;
+  --brand-dark: #3c9ab5;
+  --ink: #3c4937;
+  --bg: #f9f9f9;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+h1 { color: var(--ink); }
+
+.container { text-align: center; padding: 40px 20px; }
+
+/* ===== Header ===== */
+header {
+  position: relative; /* anchor for abs-positioned children */
+  display: flex;
+  align-items: center;
+  height: 100px;
+  padding: 0 40px;
+  background-color: #EDEDED;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Logo positioned exactly at 1/3 across, vertically centered */
+header .logo-link {
+  position: absolute;
+  left: 33%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-block;
+}
+header .logo { height: 85px; width: auto; display: block; }
+
+/* Login button at 2/3 across; only Y movement on hover */
+.login-btn {
+  position: absolute;
+  left: 66%;
+  transform: translateY(-2%);
+  background-color: var(--brand);
+  color: #fff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.login-btn:hover {
+  background-color: var(--brand-dark);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transform: translateY(-2%);
+}
+
+/* Re-usable button */
+.btn {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.btn:hover { background: var(--brand-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.2); transform: translateY(-2px); }
+
+/* ===== Search Page ===== */
+.search-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
+.search-container input {
+  padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;
+}
+.search-container button { background: var(--brand); color: #fff; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; cursor: pointer; }
+.search-container button:hover { background: var(--brand-dark); }
+.suggestions { color: #666; font-size: 14px; }
+.suggestions span { background: #eaeaea; padding: 5px 10px; margin: 3px; border-radius: 6px; cursor: pointer; display: inline-block; transition: background 0.2s; }
+.suggestions span:hover { background: var(--brand); color: #fff; }
+
+/* ===== AI Simulation Page ===== */
+.loading-area { margin-top: 120px; text-align: center; }
+.loading-bar { margin: 30px auto; width: 300px; height: 20px; background: #eaeaea; border-radius: 10px; overflow: hidden; position: relative; }
+.loading-bar-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--brand); transition: width 1s; }
+.calling-list { margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto; text-align: left; font-size: 16px; }
+.calling-item { margin-bottom: 8px; padding: 8px 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.calling-status { font-size: 14px; color: #777; }
+.complete .calling-status { color: green; font-weight: bold; }
+
+/* ===== Results Page ===== */
+.results-container { max-width: 700px; margin: 50px auto; display: flex; flex-direction: column; gap: 20px; }
+.result-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; gap: 5px; }
+.result-card:hover { transform: translateY(-3px); }
+.result-card h3 { margin: 0; color: var(--ink); }
+.category { font-size: 14px; color: #777; }
+.address { font-size: 14px; color: #555; }
+.availability { margin-top: 5px; font-weight: bold; color: var(--ink); }
+.rating { margin: 3px 0; color: #f5a623; }
+.description { font-size: 14px; color: #444; margin: 8px 0; }
+.book-btn { align-self: flex-start; margin-top: 10px; }
+
+/* ===== Login / Signup Modal ===== */
+.modal-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none; align-items: center; justify-content: center; z-index: 999;
+}
+.modal { position: relative; background: #fff; padding: 30px; border-radius: 10px; width: 320px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.close-btn { position: absolute; top: 10px; right: 15px; font-size: 22px; color: #999; cursor: pointer; }
+.close-btn:hover { color: #333; }
+.form { display: flex; flex-direction: column; }
+.form h2 { margin-bottom: 20px; text-align: center; }
+.form input, .form button { margin-bottom: 12px; padding: 10px; font-size: 16px; }
+.sign-in-btn { background: var(--brand); color: #fff; border: none; cursor: pointer; border-radius: 6px; transition: background-color 0.25s ease; }
+.sign-in-btn:hover { background: var(--brand-dark); }
+.link-btn { background: none; color: var(--brand-dark); border: none; text-align: left; font-size: 14px; cursor: pointer; padding: 0; }
+.link-btn:hover { text-decoration: underline; }
+
+/* ===== Booking Modal (Results only) ===== */
+.booking-modal { background: #fff; padding: 30px; border-radius: 10px; width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; position: relative; }
+.booking-modal input { width: 90%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; }
+.confirmation { font-size: 14px; color: green; margin-top: 10px; display: none; }
+
+/* ===== Cookie Banner ===== */
+.cookie-banner { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 1000; }
+.cookie-inner { background:#fff; border:1px solid rgba(0,0,0,0.08); box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:16px; border-radius:12px; display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.cookie-inner p { margin: 0; color:#2f3a34; }
+.cookie-actions { display:flex; gap:8px; }
+@media (max-width:640px){ .cookie-inner { flex-direction:column; align-items:flex-start; } }
+
+/* ===== Footer ===== */
+.site-footer { margin-top: 60px; padding: 28px 20px; background:#f4f6f7; color:#5a665e; border-top:1px solid rgba(0,0,0,0.06); }
+.footer-inner { max-width: 1100px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.foot-links { display:flex; gap:14px; flex-wrap:wrap; }
+.foot-links a { color:#4a564f; text-decoration:none; }
+.foot-links a:hover { text-decoration:underline; }

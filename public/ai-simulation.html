@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScheduleX – Searching...</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo-link">
+      <img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" />
+    </a>
+    <!-- No login button on sim page (per your spec) -->
+  </header>
+      <position: relative; {
+    }
+    header .logo-link {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    header .logo {
+      height: 85px;
+      width: auto;
+      margin: 0;
+    }
+
+  <div class="loading-area">
+    <h1>Finding the earliest available appointments...</h1>
+    <div class="loading-bar">
+      <div class="loading-bar-fill" id="loadingFill"></div>
+    </div>
+    <div class="calling-list" id="callingList"></div>
+  </div>
+
+  <script>
+    const businesses = [
+      'Bright Dental Clinic', 'City Health GP', 'OptiView Optometrist', 'PhysioFlex Therapy', 'Mindful Path Psychology',
+      'SmileRight Orthodontics', 'Eastside Family Doctors', 'Clear Vision Optometry', 'FlexFit Physiotherapy', 'Happy Smiles Dental'
+    ];
+
+    const list = document.getElementById('callingList');
+    businesses.forEach((name, i) => {
+      const div = document.createElement('div');
+      div.className = 'calling-item';
+      div.innerHTML = `<strong>${name}</strong> <div class="calling-status">Calling...</div>`;
+      list.appendChild(div);
+
+      setTimeout(() => div.querySelector('.calling-status').innerText = 'Connected', 2000 + i*200);
+      setTimeout(() => div.querySelector('.calling-status').innerText = 'Checking availability...', 4000 + i*200);
+      setTimeout(() => { div.querySelector('.calling-status').innerText = 'Availability received ✅'; div.classList.add('complete'); }, 7000 + i*200);
+    });
+
+    // 90s progress + redirect
+    const loadingFill = document.getElementById('loadingFill');
+    let progress = 0;
+    const interval = setInterval(() => { progress += 100/90; loadingFill.style.width = Math.min(progress,100)+'%'; }, 1000);
+    setTimeout(() => { clearInterval(interval); window.location.href = 'results.html'; }, 90000);
+  </script>
+  <script src="app.js" defer></script>
+
+</body>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="foot-left">© ScheduleX 2025</div>
+    <div class="foot-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookie-policy.html">Cookies</a>
+      <a href="status.html">Status</a>
+      <a href="contact.html">Support</a>
+    </div>
+  </div>
+</footer>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScheduleX – Book Instantly with AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<div id="cookieBanner" class="cookie-banner" hidden>
+  <div class="cookie-inner">
+    <p>We use functional and analytics cookies to run ScheduleX and improve your experience. See our <a href="cookie-policy.html">Cookie Policy</a>.</p>
+    <div class="cookie-actions">
+      <button id="cookieReject" class="btn" style="background:#e0e0e0; color:#2b2b2b;">Reject non‑essential</button>
+      <button id="cookieManage" class="btn" style="background:#ffffff; color:#2b2b2b; border:1px solid #d0d0d0;">Manage</button>
+      <button id="cookieAccept" class="btn">Accept all</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const KEY = 'schedx_cookie_choice_v1';
+  const banner = document.getElementById('cookieBanner');
+  if (!localStorage.getItem(KEY)) banner.hidden = false;
+  function remember(v){ localStorage.setItem(KEY, v); banner.hidden = true; }
+  document.getElementById('cookieAccept').onclick = ()=>remember('accept');
+  document.getElementById('cookieReject').onclick = ()=>remember('reject');
+  document.getElementById('cookieManage').onclick = ()=>alert('Preference center coming soon.');
+})();
+</script>
+<body>
+  <header>
+    <a href="index.html" class="logo-link">
+      <img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" />
+    </a>
+    <button class="login-btn" id="openModal">Login / Sign Up</button>
+  </header>
+
+  <main class="container" style="margin-top: 100px;">
+    <h1>Book Anything, Anywhere, Instantly with AI</h1>
+    <div class="search-container">
+      <input type="text" id="service" placeholder="Search service (e.g. Dentist, GP)" />
+      <input type="text" id="location" placeholder="Enter suburb or postcode" />
+      <button class="btn" id="searchBtn">Find Appointment</button>
+      <div class="suggestions">
+        Popular:
+        <span onclick="fillService('General Practitioner')">General Practitioner</span>
+        <span onclick="fillService('Dentist')">Dentist</span>
+        <span onclick="fillService('Optometrist')">Optometrist</span>
+        <span onclick="fillService('Physiotherapist')">Physiotherapist</span>
+        <span onclick="fillService('Psychologist')">Psychologist</span>
+      </div>
+      <hr style="border:none; border-top:2px solid rgba(0,0,0,0.1); margin:60px 0;">
+<section class="how-it-works" style="background:#f9f9f9; padding:60px 20px; text-align:center;">
+  <h2 style="font-size:2.4em; margin-bottom:20px; color:#3c4937; font-weight:700;">How ScheduleX Works</h2>
+  <p style="max-width:750px; margin:0 auto 50px; color:#555; font-size:1.15em; line-height:1.6;">
+    We’ve simplified the booking process so you can get the care you need without the hassle. Here’s how it works, step‑by‑step.
+  </p>
+  <div class="steps" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:35px; max-width:1100px; margin:0 auto;">
+    <div class="step" style="background:#fff; padding:28px 20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
+      <div class="icon" style="font-size:44px; color:#56bbd5; margin-bottom:15px;">🔍</div>
+      <h3 style="color:#3c4937; font-size:1.3em;">1. Search</h3>
+      <p style="color:#555; line-height:1.5;">Enter the service you need and your location to instantly browse the most relevant providers.</p>
+    </div>
+    <div class="step" style="background:#fff; padding:28px 20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
+      <div class="icon" style="font-size:44px; color:#56bbd5; margin-bottom:15px;">📅</div>
+      <h3 style="color:#3c4937; font-size:1.3em;">2. Compare</h3>
+      <p style="color:#555; line-height:1.5;">See live availability, read reviews, and compare details to choose the provider that fits your needs.</p>
+    </div>
+    <div class="step" style="background:#fff; padding:28px 20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
+      <div class="icon" style="font-size:44px; color:#56bbd5; margin-bottom:15px;">✅</div>
+      <h3 style="color:#3c4937; font-size:1.3em;">3. Book</h3>
+      <p style="color:#555; line-height:1.5;">Book your appointment online in seconds – no hold music or back‑and‑forth calls required.</p>
+    </div>
+    <div class="step" style="background:#fff; padding:28px 20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
+      <div class="icon" style="font-size:44px; color:#56bbd5; margin-bottom:15px;">📩</div>
+      <h3 style="color:#3c4937; font-size:1.3em;">4. Confirm</h3>
+      <p style="color:#555; line-height:1.5;">Get instant confirmation and automatic reminders so you never miss an appointment.</p>
+    </div>
+  </div>
+</section>
+    </div>
+  </main>
+
+  <!-- Login / Signup Modal (Source of Truth) -->
+  <div id="modalBg" class="modal-bg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span id="closeModal" class="close-btn" aria-label="Close">&times;</span>
+
+      <div id="loginForm" class="form">
+        <h2 id="authTitle">Login</h2>
+        <input type="text" placeholder="Email or Phone Number" />
+        <input type="password" placeholder="Password" />
+        <button class="sign-in-btn">Sign In</button>
+        <button class="link-btn" id="forgotPasswordBtn" type="button">Forgot Password?</button>
+        <button class="link-btn" id="showSignUp" type="button">Don’t have an account? Sign up</button>
+      </div>
+
+      <div id="signUpForm" class="form" style="display: none;">
+        <h2>Sign Up</h2>
+        <input type="text" placeholder="First Name" />
+        <input type="text" placeholder="Last Name" />
+        <label>DOB</label>
+        <input type="date" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <input type="password" placeholder="Re-enter Password" />
+        <button class="sign-in-btn">Create Account</button>
+        <button class="link-btn" id="showLogin" type="button">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navigation
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      window.location.href = 'ai-simulation.html';
+    });
+    function fillService(service) { document.getElementById('service').value = service; }
+
+    // Modal Logic (Source of Truth)
+    const modalBg = document.getElementById('modalBg');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const loginForm = document.getElementById('loginForm');
+    const signUpForm = document.getElementById('signUpForm');
+
+    openModalBtn.addEventListener('click', () => { modalBg.style.display = 'flex'; modalBg.setAttribute('aria-hidden','false'); });
+    closeModalBtn.addEventListener('click', closeModal);
+    modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    document.getElementById('showSignUp').addEventListener('click', () => {
+      loginForm.style.display = 'none'; signUpForm.style.display = 'block';
+    });
+    document.getElementById('showLogin').addEventListener('click', () => {
+      signUpForm.style.display = 'none'; loginForm.style.display = 'block';
+    });
+
+    function closeModal(){ modalBg.style.display = 'none'; modalBg.setAttribute('aria-hidden','true'); }
+  </script>
+  <script src="app.js" defer></script>
+
+</body>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="foot-left">© ScheduleX 2025</div>
+    <div class="foot-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookie-policy.html">Cookies</a>
+      <a href="contact.html">Support</a>
+    </div>
+  </div>
+</footer>
+</html>

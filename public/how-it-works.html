@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How it works – ScheduleX</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo-link"><img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" /></a>
+    <button class="login-btn" id="openModal">Login / Sign Up</button>
+  </header>
+
+  <main class="container" style="max-width:900px; margin: 80px auto; text-align:left;">
+    <h1>How ScheduleX works</h1>
+    <ol style="line-height:1.8;">
+      <li><strong>Search</strong> — Tell us what you need (e.g., “Dentist, Brisbane CBD”).</li>
+      <li><strong>Live availability</strong> — We surface online calendars instantly. If a clinic doesn’t publish slots, our AI politely <em>calls</em> to ask for the next opening.</li>
+      <li><strong>Book & confirm</strong> — Pick a time, add your details, and get confirmation by email/SMS.</li>
+    </ol>
+
+    <h2>What to expect</h2>
+    <ul style="line-height:1.8;">
+      <li>Some results are simulated while we onboard providers.</li>
+      <li>If we can’t confirm your exact time, we suggest close alternatives or telehealth.</li>
+      <li>You can reschedule/cancel directly with the clinic; their details are in your confirmation.</li>
+    </ul>
+
+    <p><a class="btn" href="index.html">Find an appointment</a></p>
+  </main>
+
+  <!-- Modal (copied from index) -->
+  <div id="modalBg" class="modal-bg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span id="closeModal" class="close-btn" aria-label="Close">&times;</span>
+      <div id="loginForm" class="form">
+        <h2 id="authTitle">Login</h2>
+        <input type="text" placeholder="Email or Phone Number" />
+        <input type="password" placeholder="Password" />
+        <button class="sign-in-btn">Sign In</button>
+        <button class="link-btn" id="showSignUp" type="button">Don’t have an account? Sign up</button>
+      </div>
+      <div id="signUpForm" class="form" style="display:none;">
+        <h2>Sign Up</h2>
+        <input type="text" placeholder="First Name" />
+        <input type="text" placeholder="Last Name" />
+        <label>DOB</label>
+        <input type="date" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <input type="password" placeholder="Re-enter Password" />
+        <button class="sign-in-btn">Create Account</button>
+        <button class="link-btn" id="showLogin" type="button">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:40px 20px; color:#666;">
+    © ScheduleX 2025 · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="cookie-policy.html">Cookies</a> · <a href="status.html">Status</a> · <a href="contact.html">Support</a>
+  </footer>
+
+  <script>
+    // Minimal modal open/close
+    const modalBg = document.getElementById('modalBg');
+    document.getElementById('openModal').addEventListener('click',()=>{modalBg.style.display='flex'});
+    document.getElementById('closeModal').addEventListener('click',()=>{modalBg.style.display='none'});
+    document.getElementById('showSignUp').addEventListener('click',()=>{loginForm.style.display='none';signUpForm.style.display='block'});
+    document.getElementById('showLogin').addEventListener('click',()=>{signUpForm.style.display='none';loginForm.style.display='block'});
+  </script>
+  <script src="app.js" defer></script>
+
+</body>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="foot-left">© ScheduleX 2025</div>
+    <div class="foot-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookie-policy.html">Cookies</a>
+      <a href="status.html">Status</a>
+      <a href="contact.html">Support</a>
+    </div>
+  </div>
+</footer>
+</html>

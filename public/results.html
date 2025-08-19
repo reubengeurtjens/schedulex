@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScheduleX – Results</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo-link">
+      <img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" />
+    </a>
+    <button class="login-btn" id="openModal">Login / Sign Up</button>
+  </header>
+
+  <h1 style="text-align:center; margin-top:40px;">Your Available Appointments</h1>
+
+  <div class="results-container">
+    <div class="result-card">
+      <h3>Bright Dental Clinic</h3>
+      <div class="category">Dentist</div>
+      <div class="address">123 Main Street, City Center</div>
+      <div class="availability">Next Available: Tomorrow at 9:00 AM</div>
+      <div class="rating">★★★★★</div>
+      <div class="description">Providing high-quality dental care including general dentistry, whitening, and emergency treatments.</div>
+      <button class="btn book-btn" onclick="openBookingModal('Bright Dental Clinic')">Book Now</button>
+    </div>
+
+    <div class="result-card">
+      <h3>City Health GP</h3>
+      <div class="category">General Practitioner</div>
+      <div class="address">45 Wellness Ave, Suburbia</div>
+      <div class="availability">Next Available: Today at 3:30 PM</div>
+      <div class="rating">★★★★☆</div>
+      <div class="description">Family-friendly medical clinic offering general check-ups, prescriptions, and chronic disease management.</div>
+      <button class="btn book-btn" onclick="openBookingModal('City Health GP')">Book Now</button>
+    </div>
+
+    <div class="result-card">
+      <h3>OptiView Optometrist</h3>
+      <div class="category">Optometrist</div>
+      <div class="address">789 Vision Blvd, East Side</div>
+      <div class="availability">Next Available: Friday at 10:15 AM</div>
+      <div class="rating">★★★★☆</div>
+      <div class="description">Expert eye care, vision testing, and a wide range of designer frames and contact lenses.</div>
+      <button class="btn book-btn" onclick="openBookingModal('OptiView Optometrist')">Book Now</button>
+    </div>
+  </div>
+
+  <!-- Login / Signup Modal (IDENTICAL to index) -->
+  <div id="modalBg" class="modal-bg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span id="closeModal" class="close-btn" aria-label="Close">&times;</span>
+
+      <div id="loginForm" class="form">
+        <h2 id="authTitle">Login</h2>
+        <input type="text" placeholder="Email or Phone Number" />
+        <input type="password" placeholder="Password" />
+        <button class="sign-in-btn">Sign In</button>
+        <button class="link-btn" id="forgotPasswordBtn" type="button">Forgot Password?</button>
+        <button class="link-btn" id="showSignUp" type="button">Don’t have an account? Sign up</button>
+      </div>
+
+      <div id="signUpForm" class="form" style="display: none;">
+        <h2>Sign Up</h2>
+        <input type="text" placeholder="First Name" />
+        <input type="text" placeholder="Last Name" />
+        <label>DOB</label>
+        <input type="date" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <input type="password" placeholder="Re-enter Password" />
+        <button class="sign-in-btn">Create Account</button>
+        <button class="link-btn" id="showLogin" type="button">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-bg" id="bookingModalBg" aria-hidden="true">
+    <div class="booking-modal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+      <h2 id="bookingTitle">Book</h2>
+      <input type="text" id="userName" placeholder="Full Name" />
+      <input type="email" id="userEmail" placeholder="Email" />
+      <input type="tel" id="userPhone" placeholder="Phone Number" />
+      <button class="btn" onclick="confirmBooking()">Submit</button>
+      <div class="confirmation" id="confirmationMessage">Booking Confirmed! (Simulated Email & SMS Sent)</div>
+      <p style="margin-top:15px; font-size:12px; color:#555; cursor:pointer;" onclick="closeBookingModal()">Cancel</p>
+    </div>
+  </div>
+
+  <script>
+    // === Login modal logic (IDENTICAL to index) ===
+    const modalBg = document.getElementById('modalBg');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const loginForm = document.getElementById('loginForm');
+    const signUpForm = document.getElementById('signUpForm');
+
+    openModalBtn.addEventListener('click', () => { modalBg.style.display = 'flex'; modalBg.setAttribute('aria-hidden','false'); });
+    closeModalBtn.addEventListener('click', closeModal);
+    modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    document.getElementById('showSignUp').addEventListener('click', () => { loginForm.style.display = 'none'; signUpForm.style.display = 'block'; });
+    document.getElementById('showLogin').addEventListener('click', () => { signUpForm.style.display = 'none'; loginForm.style.display = 'block'; });
+
+    function closeModal(){ modalBg.style.display = 'none'; modalBg.setAttribute('aria-hidden','true'); }
+
+    // === Booking modal logic ===
+    let bookedBusiness = '';
+    function openBookingModal(business) {
+      bookedBusiness = business;
+      document.getElementById('bookingTitle').innerText = 'Book: ' + business;
+      document.getElementById('confirmationMessage').style.display = 'none';
+      document.getElementById('bookingModalBg').style.display = 'flex';
+      document.getElementById('bookingModalBg').setAttribute('aria-hidden','false');
+    }
+    window.openBookingModal = openBookingModal;
+
+    function closeBookingModal() {
+      document.getElementById('bookingModalBg').style.display = 'none';
+      document.getElementById('bookingModalBg').setAttribute('aria-hidden','true');
+    }
+    window.closeBookingModal = closeBookingModal;
+
+    function confirmBooking() {
+      const name = document.getElementById('userName').value;
+      const email = document.getElementById('userEmail').value;
+      const phone = document.getElementById('userPhone').value;
+      if (!name || !email || !phone) { alert('Please fill all fields to confirm booking.'); return; }
+      document.getElementById('confirmationMessage').style.display = 'block';
+      // Placeholder for backend call
+    }
+    window.confirmBooking = confirmBooking;
+  </script>
+  <script src="app.js" defer></script>
+
+</body>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="foot-left">© ScheduleX 2025</div>
+    <div class="foot-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookie-policy.html">Cookies</a>
+      <a href="status.html">Status</a>
+      <a href="contact.html">Support</a>
+    </div>
+  </div>
+</footer>
+</html>

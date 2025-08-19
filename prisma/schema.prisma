@@ -1,0 +1,84 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RequestStatus {
+  open
+  scheduled
+  cancelled
+}
+
+enum CalloutStatus {
+  scheduled
+  cancelled
+  completed
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  name      String?
+  role      Role      @default(USER)
+  requests  JobRequest[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Provider {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String?
+  address   String?
+  category  String?
+  website   String?
+  services  String?
+  callouts  Callout[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model JobRequest {
+  id          Int            @id @default(autoincrement())
+  userId      Int
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String
+  description String
+  address     String?
+  status      RequestStatus  @default(open)
+  expiresAt   DateTime?
+  callouts    Callout[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Callout {
+  id              Int           @id @default(autoincrement())
+  requestId       Int
+  providerId      Int
+  request         JobRequest    @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  provider        Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  startTime       DateTime
+  endTime         DateTime?
+  status          CalloutStatus @default(scheduled)
+  notes           String?
+  confirmedBy     String?
+  confirmationRef String?
+  cancelledAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([requestId])
+  @@index([providerId])
+}

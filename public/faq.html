@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ – ScheduleX</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo-link"><img class="logo" src="assets/ScheduleX.png" alt="ScheduleX Logo" /></a>
+    <button class="login-btn" id="openModal">Login / Sign Up</button>
+  </header>
+
+  <main class="container" style="max-width:900px; margin:80px auto; text-align:left;">
+    <h1>Frequently asked questions</h1>
+    <h3>Do you actually make phone calls?</h3>
+    <p>Yes. When calendars aren’t public, our AI assistant calls clinics to politely ask for the next available time.</p>
+
+    <h3>Is the information accurate?</h3>
+    <p>Online calendars are live. Phone‑confirmed times are as accurate as the clinic’s response at that moment; we time‑stamp each confirmation.</p>
+
+    <h3>Do I pay ScheduleX or the clinic?</h3>
+    <p>You book through ScheduleX, but pay the clinic at your visit (unless they support pre‑pay).</p>
+
+    <h3>Is my data safe?</h3>
+    <p>Yes. We don’t sell personal data. We encrypt in transit and at rest. See <a href="privacy.html">Privacy</a>.</p>
+
+    <h3>Where are you available?</h3>
+    <p>Australia‑wide to start (in‑person and telehealth). More countries coming.</p>
+
+    <h3>Can I cancel or reschedule?</h3>
+    <p>Yes—your confirmation includes the clinic’s policy and contact details.</p>
+
+    <h3>Are you a medical provider?</h3>
+    <p>No. We’re a booking facilitator. Always seek advice from a qualified healthcare professional.</p>
+
+    <p style="margin-top:20px"><a class="btn" href="index.html">Find an appointment</a></p>
+  </main>
+
+  <!-- Modal & Footer (same pattern) -->
+  <div id="modalBg" class="modal-bg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <span id="closeModal" class="close-btn" aria-label="Close">&times;</span>
+      <div id="loginForm" class="form">
+        <h2 id="authTitle">Login</h2>
+        <input type="text" placeholder="Email or Phone Number" />
+        <input type="password" placeholder="Password" />
+        <button class="sign-in-btn">Sign In</button>
+        <button class="link-btn" id="showSignUp" type="button">Don’t have an account? Sign up</button>
+      </div>
+      <div id="signUpForm" class="form" style="display:none;">
+        <h2>Sign Up</h2>
+        <input type="text" placeholder="First Name" />
+        <input type="text" placeholder="Last Name" />
+        <label>DOB</label>
+        <input type="date" />
+        <input type="email" placeholder="Email" />
+        <input type="password" placeholder="Password" />
+        <input type="password" placeholder="Re-enter Password" />
+        <button class="sign-in-btn">Create Account</button>
+        <button class="link-btn" id="showLogin" type="button">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:40px 20px; color:#666;">
+    © ScheduleX 2025 · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="cookie-policy.html">Cookies</a> · <a href="status.html">Status</a> · <a href="contact.html">Support</a>
+  </footer>
+
+  <script>
+    const modalBg = document.getElementById('modalBg');
+    document.getElementById('openModal').addEventListener('click',()=>{modalBg.style.display='flex'});
+    document.getElementById('closeModal').addEventListener('click',()=>{modalBg.style.display='none'});
+    document.getElementById('showSignUp').addEventListener('click',()=>{loginForm.style.display='none';signUpForm.style.display='block'});
+    document.getElementById('showLogin').addEventListener('click',()=>{signUpForm.style.display='none';loginForm.style.display='block'});
+  </script>
+  <script src="app.js" defer></script>
+
+</body>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="foot-left">© ScheduleX 2025</div>
+    <div class="foot-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookie-policy.html">Cookies</a>
+      <a href="status.html">Status</a>
+      <a href="contact.html">Support</a>
+    </div>
+  </div>
+</footer>
+</html>
