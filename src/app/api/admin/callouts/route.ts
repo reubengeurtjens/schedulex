@@ -1,120 +1,111 @@
-export const runtime = 'nodejs';
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { PrismaClient /*, CalloutStatus */ } from '@prisma/client';
+export const dynamic = "force-dynamic"; // disable caching for this route
 
-// Robust tx type: a Prisma client without the lifecycle methods
-type Tx = Omit<
-  PrismaClient,
-  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
->;
-
-function isAdmin(req: Request) {
-  const key = req.headers.get('x-admin-key') ?? '';
-  return !!process.env.ADMIN_API_KEY && key === process.env.ADMIN_API_KEY;
+/** ---------- tiny helpers ---------- */
+function unauthorized() {
+  return Response.json({ error: "unauthorized" }, { status: 401 });
+}
+function okNoStore(json: any, status = 200) {
+  return Response.json(json, { status, headers: { "Cache-Control": "no-store" } });
+}
+function isAdmin(req: NextRequest) {
+  const header = req.headers.get("x-admin-key") ?? "";
+  const key = process.env.ADMIN_API_KEY ?? "";
+  return header.length > 0 && key.length > 0 && header === key;
 }
 
-// What we return
-type CalloutPublic = {
-  id: number;
-  requestId: number;
-  providerId: number;
-  startTime: Date;
-  endTime: Date | null;
-  status: string;                // if you use enums, this will still match
-  notes: string | null;
-  confirmedBy: string | null;
-  confirmationRef: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+/** ---------- validation ---------- */
+const CalloutCreateSchema = z.object({
+  requestId: z.number().int().positive(),
+  providerId: z.number().int().positive(),
+  startTime: z.union([z.string().datetime(), z.date()]).transform((v) => new Date(v)),
+  endTime: z.union([z.string().datetime(), z.date()]).optional().transform((v) => (v ? new Date(v) : undefined)),
+  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]).default("PENDING"),
+  notes: z.string().max(1000).optional(),
+});
 
-export async function POST(req: Request) {
-  if (!isAdmin(req)) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+/** ---------- GET ----------
+ * - If ?lists=1 or ?list=1 present → returns { providers, requests }
+ * - Otherwise → returns { callouts }
+ */
+export async function GET(req: NextRequest) {
+  if (!isAdmin(req)) return unauthorized();
+
+  const sp = new URL(req.url).searchParams;
+  const wantLists = sp.get("lists") ?? sp.get("list");
+  const take = Math.min(Number(sp.get("take") ?? 20), 100);
+
+  if (wantLists) {
+    const [providers, requests] = await Promise.all([
+      prisma.provider.findMany({
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, email: true, phone: true, city: true },
+      }),
+      prisma.jobRequest.findMany({
+        orderBy: { createdAt: "desc" },
+        take,
+        select: { id: true, category: true, description: true, location: true, status: true, createdAt: true },
+      }),
+    ]);
+    return okNoStore({ providers, requests });
   }
 
-  const body = await req.json().catch(() => ({} as any));
-
-  const requestId  = typeof body?.requestId  === 'string' ? Number(body.requestId)  : body?.requestId;
-  const providerId = typeof body?.providerId === 'string' ? Number(body.providerId) : body?.providerId;
-  const startTime  = body?.startTime ? new Date(body.startTime) : null;
-  const endTime    = body?.endTime   ? new Date(body.endTime)   : null;
-  const notes       = body?.notes ? String(body.notes) : null;
-  const confirmedBy = body?.confirmedBy ? String(body.confirmedBy) : 'phone';
-  const confirmationRef = body?.confirmationRef ? String(body.confirmationRef) : null;
-
-  if (!Number.isFinite(requestId) || !Number.isFinite(providerId) || !startTime) {
-    return NextResponse.json({ error: 'requestId, providerId, startTime required' }, { status: 400 });
-  }
-  if (endTime && !(startTime < endTime)) {
-    return NextResponse.json({ error: 'endTime must be after startTime' }, { status: 400 });
-  }
-
-  const reqRow = await prisma.jobRequest.findUnique({
-    where: { id: requestId },
-    select: { id: true, status: true, expiresAt: true },
+  const callouts = await prisma.callout.findMany({
+    orderBy: { createdAt: "desc" },
+    take,
+    select: {
+      id: true,
+      requestId: true,
+      providerId: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
-  if (!reqRow || reqRow.status !== 'open' || (reqRow.expiresAt && reqRow.expiresAt < new Date())) {
-    return NextResponse.json({ error: 'request not open/expired' }, { status: 409 });
-  }
+  return okNoStore({ callouts });
+}
 
-  const prov = await prisma.provider.findUnique({
-    where: { id: providerId },
-    select: { id: true },
-  });
-  if (!prov) {
-    return NextResponse.json({ error: 'provider not found' }, { status: 404 });
-  }
+/** ---------- POST ----------
+ * Create a callout (admin only)
+ */
+export async function POST(req: NextRequest) {
+  if (!isAdmin(req)) return unauthorized();
 
-  // Optional: only one scheduled callout per request
-  const existing = await prisma.callout.findFirst({
-    where: { requestId, status: 'scheduled' /* or CalloutStatus.scheduled */ },
-    select: { id: true, startTime: true },
-  });
-  if (existing) {
-    return NextResponse.json(
-      { error: 'already_scheduled', calloutId: existing.id, startTime: existing.startTime },
-      { status: 409 }
-    );
-  }
+  const body = await req.json().catch(() => null);
+  if (!body) return okNoStore({ error: "invalid_json" }, 400);
 
-  // Create & update atomically
-  const callout = await prisma.$transaction(async (tx: Tx): Promise<CalloutPublic> => {
-    const co = await tx.callout.create({
-      data: {
-        requestId,
-        providerId,
-        startTime,
-        endTime,
-        notes,
-        confirmedBy,
-        confirmationRef,
-        status: 'scheduled' as const, // or CalloutStatus.scheduled if using enums
-      },
-      select: {
-        id: true,
-        requestId: true,
-        providerId: true,
-        startTime: true,
-        endTime: true,
-        status: true,
-        notes: true,
-        confirmedBy: true,
-        confirmationRef: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  const parsed = CalloutCreateSchema.safeParse(body);
+  if (!parsed.success) return okNoStore({ error: "validation_error", issues: parsed.error.issues }, 400);
 
-    await tx.jobRequest.update({
-      where: { id: requestId },
-      data: { status: 'scheduled' as const }, // or JobRequestStatus.scheduled
-    });
+  const { requestId, providerId, startTime, endTime, status, notes } = parsed.data;
 
-    return co as CalloutPublic;
+  // ensure FKs exist (nicer error than DB constraint)
+  const [reqRow, provRow] = await Promise.all([
+    prisma.jobRequest.findUnique({ where: { id: requestId }, select: { id: true } }),
+    prisma.provider.findUnique({ where: { id: providerId }, select: { id: true } }),
+  ]);
+  if (!reqRow || !provRow) return okNoStore({ error: "not_found", detail: "Request or Provider not found" }, 404);
+
+  const callout = await prisma.callout.create({
+    data: { requestId, providerId, startTime, endTime, status, notes },
+    select: {
+      id: true,
+      requestId: true,
+      providerId: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
-  return NextResponse.json({ callout }, { status: 201 });
+  return okNoStore({ callout }, 201);
 }

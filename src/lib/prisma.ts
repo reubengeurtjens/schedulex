@@ -1,13 +1,15 @@
-// src/lib/prisma.ts
-import 'server-only';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-const g = global as unknown as { prisma?: PrismaClient };
+// Ensure a single PrismaClient instance in dev to avoid hot-reload leaks
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
+// Named export (so you can `import { prisma } from "@/lib/prisma"`)
 export const prisma =
-  g.prisma ??
-  new PrismaClient({
-    log: ['warn', 'error'],
-  });
+  globalThis.prisma ?? new PrismaClient({ log: ["warn", "error"] });
 
-if (process.env.NODE_ENV !== 'production') g.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalThis.prisma = prisma;
+}

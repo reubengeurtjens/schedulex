@@ -1,28 +1,38 @@
-export const runtime = 'nodejs';
+// src/app/api/requests/[id]/callouts/route.ts
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+export const dynamic = "force-dynamic";
 
-interface Params { params: { id: string } }
+// In Next.js 15, params is a Promise and must be awaited
+type Ctx = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
-  const id = Number(params.id);
-  if (!Number.isFinite(id)) return NextResponse.json({ error: 'invalid id' }, { status: 400 });
+export async function GET(_req: Request, { params }: Ctx) {
+  const { id } = await params;
+  const requestId = Number(id);
 
-  const callouts = await prisma.callout.findMany({
-    where: { requestId: id },
-    orderBy: { startTime: 'asc' },
-    select: {
-      id: true,
-      provider: { select: { id: true, name: true, phone: true, address: true, category: true } },
-      startTime: true,
-      endTime: true,
-      status: true,
-      notes: true,
-      confirmationRef: true,
-      createdAt: true
-    }
-  });
+  if (!Number.isFinite(requestId)) {
+    return NextResponse.json({ error: "invalid id" }, { status: 400 });
+  }
 
-  return NextResponse.json({ count: callouts.length, callouts });
+  try {
+    const rows = await prisma.callout.findMany({
+      where: { requestId },
+      orderBy: [{ startTime: "asc" }, { id: "asc" }],
+    });
+
+    // Optional: alias `startTime` → `scheduledAt` for any UI that expects that name
+    const callouts = rows.map((row: any) => ({
+      ...row,
+      scheduledAt: row.startTime ?? null,
+    }));
+
+    return NextResponse.json({ callouts }, { status: 200 });
+  } catch (err: any) {
+    const detail = err?.message ?? String(err);
+    return NextResponse.json(
+      { error: "failed to fetch callouts", detail },
+      { status: 500 }
+    );
+  }
 }

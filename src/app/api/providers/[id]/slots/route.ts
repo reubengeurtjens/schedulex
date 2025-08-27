@@ -1,26 +1,29 @@
-export const runtime = 'nodejs';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+export const dynamic = "force-dynamic";
 
-interface Params { params: { id: string } }
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const take = Math.min(Number(url.searchParams.get("take") ?? 50), 200);
+  const q = (url.searchParams.get("q") ?? "").trim();
 
-export async function GET(_req: Request, { params }: Params) {
-  try {
-    const providerId = Number(params.id); // cast if your model uses Int
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { email: { contains: q, mode: "insensitive" } },
+          { phone: { contains: q, mode: "insensitive" } },
+          { city: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {};
 
-    const slots = await prisma.slot.findMany({
-      where: {
-        providerId,
-        booked: false,
-        startTime: { gte: new Date() },
-      },
-      orderBy: { startTime: 'asc' },
-    });
+  const providers = await prisma.provider.findMany({
+    where,
+    take,
+    orderBy: { id: "desc" },
+  });
 
-    return NextResponse.json({ slots });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
-  }
+  return NextResponse.json({ providers });
 }

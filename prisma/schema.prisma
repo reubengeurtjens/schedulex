@@ -14,70 +14,75 @@ enum Role {
 }
 
 enum RequestStatus {
-  open
-  scheduled
-  cancelled
+  NEW
+  SCHEDULED
+  CANCELLED
+  COMPLETED
 }
 
 enum CalloutStatus {
-  scheduled
-  cancelled
-  completed
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  name      String?
-  role      Role      @default(USER)
-  requests  JobRequest[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  name         String?
+  passwordHash String?
+  role         Role         @default(USER)
+  requests     JobRequest[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Provider {
   id        Int       @id @default(autoincrement())
   name      String
+  email     String?   @unique
   phone     String?
+  city      String?
+  timezone  String?
+  notes     String?
   address   String?
-  category  String?
   website   String?
   services  String?
+  category  String?
   callouts  Callout[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([name])
+  @@index([city])
 }
 
 model JobRequest {
-  id          Int            @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   userId      Int
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category    String
-  description String
-  address     String?
-  status      RequestStatus  @default(open)
-  expiresAt   DateTime?
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String?
+  description String?
+  location    String?
+  status      RequestStatus @default(NEW)
   callouts    Callout[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Callout {
-  id              Int           @id @default(autoincrement())
-  requestId       Int
-  providerId      Int
-  request         JobRequest    @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  provider        Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  startTime       DateTime
-  endTime         DateTime?
-  status          CalloutStatus @default(scheduled)
-  notes           String?
-  confirmedBy     String?
-  confirmationRef String?
-  cancelledAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id         Int           @id @default(autoincrement())
+  requestId  Int
+  request    JobRequest    @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId Int
+  provider   Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  startTime  DateTime?
+  endTime    DateTime?
+  status     CalloutStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
   @@index([requestId])
   @@index([providerId])

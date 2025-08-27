@@ -30,3 +30,7 @@ prisma/dev.db*
 
 
 /generated/prisma
+node_modules
+.next
+.env
+.env.*

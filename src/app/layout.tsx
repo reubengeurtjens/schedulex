@@ -7,7 +7,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="/auth/register">Register</a>
           <a href="/auth/login">Login</a>
           <a href="/request/new">New Request</a>
-          <a href="/admin/upsert-provider">Admin: Upsert Provider</a>
+          <a href="/admin/providers-upsert">Admin: provider upsert</a>
           <a href="/admin/callouts">Admin: Schedule Call-out</a>
         </nav>
         {children}
