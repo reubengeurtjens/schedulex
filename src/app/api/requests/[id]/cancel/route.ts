@@ -1,15 +1,10 @@
-// src/app/api/requests/[id]/cancel/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Make sure we're on Node.js runtime (Prisma doesn't work on edge)
-export const runtime = "nodejs"; // optional but safe
+export const runtime = "nodejs";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const id = Number(params.id);
+export async function POST(_req: NextRequest, context: any) {
+  const id = Number(context?.params?.id);
   if (!Number.isFinite(id)) {
     return NextResponse.json({ error: "invalid_id" }, { status: 400 });
   }
@@ -17,7 +12,7 @@ export async function POST(
   try {
     const updated = await prisma.jobRequest.update({
       where: { id },
-      data: { status: "CANCELLED" }, // or RequestStatus.CANCELLED if you import the enum
+      data: { status: "CANCELLED" }, // matches your Prisma enum value
       select: { id: true, status: true },
     });
 
