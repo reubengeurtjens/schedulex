@@ -1,37 +1,50 @@
-// src/app/api/search/route.ts
-export const runtime = 'nodejs';
+// src/app/api/providers/search/route.ts
+import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+export const runtime = "nodejs";
 
-export async function GET(req: Request) {
+export async function GET(_req: Request): Promise<Response> {
   try {
-    const { searchParams } = new URL(req.url);
-    const q = (searchParams.get('q') ?? '').trim();
-    const limitParam = Number(searchParams.get('limit') ?? 20);
-    const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 20, 1), 100);
+    const url = new URL(_req.url);
+    const q = (url.searchParams.get("q") ?? "").trim();
+    const take = Math.min(Number(url.searchParams.get("take") ?? "50"), 100);
+    const skip = Math.max(Number(url.searchParams.get("skip") ?? "0"), 0);
 
-    // Minimal, schema-agnostic search: name only
-    const where = q ? { name: { contains: q, mode: 'insensitive' } } : {};
+    const where: Prisma.ProviderWhereInput = q
+      ? {
+          OR: [
+            { name:  { contains: q, mode: "insensitive" } },
+            { email: { contains: q, mode: "insensitive" } },
+            { phone: { contains: q, mode: "insensitive" } },
+            { city:  { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {};
 
-    const rows = await prisma.provider.findMany({
-      where,
-      select: { id: true, name: true }, // add more fields later as your schema grows
-      orderBy: q ? { name: 'asc' } : undefined,
-      take: limit,
-    });
+    const [items, total] = await Promise.all([
+      prisma.provider.findMany({
+        where,
+        orderBy: { id: "desc" },
+        take,
+        skip,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          city: true,
+        },
+      }),
+      prisma.provider.count({ where }),
+    ]);
 
-    // TypeScript-friendly map: infer the element type from `rows`
-    const results = rows.map((r: typeof rows[number]) => ({
-      id: r.id,
-      name: r.name,
-      services: null as string | null, // placeholders to keep UI/AI contract stable
-      address: null as string | null,
-    }));
-
-    return NextResponse.json({ count: results.length, results });
-  } catch (err) {
-    console.error('search error:', err);
-    return NextResponse.json({ error: 'server error' }, { status: 500 });
+    return NextResponse.json({ items, total, take, skip });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: "search_failed", detail: err?.message ?? String(err) },
+      { status: 500 }
+    );
   }
 }

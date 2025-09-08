@@ -1,29 +1,25 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const take = Math.min(Number(url.searchParams.get("take") ?? 50), 200);
-  const q = (url.searchParams.get("q") ?? "").trim();
+type Ctx = { params: Promise<{ id: string }> };
 
-  const where = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { email: { contains: q, mode: "insensitive" } },
-          { phone: { contains: q, mode: "insensitive" } },
-          { city: { contains: q, mode: "insensitive" } },
-        ],
-      }
-    : {};
+export async function GET(_req: NextRequest, ctx: Ctx) {
+  const { id } = await ctx.params;
 
-  const providers = await prisma.provider.findMany({
-    where,
-    take,
-    orderBy: { id: "desc" },
+  const now = new Date();
+  const ONE_HOUR = 60 * 60 * 1000;
+
+  const slots = Array.from({ length: 4 }).map((_, i) => {
+    const start = new Date(now.getTime() + i * ONE_HOUR);
+    const end = new Date(start.getTime() + ONE_HOUR);
+    return {
+      id: `${id}-${i + 1}`,
+      providerId: id,
+      startTime: start.toISOString(),
+      endTime: end.toISOString(),
+    };
   });
 
-  return NextResponse.json({ providers });
+  return NextResponse.json({ providerId: id, slots });
 }

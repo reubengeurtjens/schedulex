@@ -1,15 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-
-// Ensure a single PrismaClient instance in dev to avoid hot-reload leaks
+// src/lib/prisma.ts
+import { PrismaClient } from '@prisma/client';
 declare global {
+  // avoid creating multiple instances in dev
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
-
-// Named export (so you can `import { prisma } from "@/lib/prisma"`)
 export const prisma =
-  globalThis.prisma ?? new PrismaClient({ log: ["warn", "error"] });
+  global.prisma ??
+  new PrismaClient({
+    log: ['error', 'warn'],
+  });
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
 }
