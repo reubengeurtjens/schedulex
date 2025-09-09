@@ -1,12 +1,15 @@
-// prisma/schema.prisma
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Ensures a Linux client is built during Vercel’s build
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
+  // Use Postgres on a hosted provider (Neon/Supabase/RDS/etc.)
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 enum Role {
   USER
