@@ -1,24 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-type Ctx = { params: Promise<{ id: string }> };
-
-async function cancelById(ctx: Ctx) {
-  const { id } = await ctx.params;
-  const idNum = Number(id);
-  if (!Number.isFinite(idNum)) {
-    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
-  }
-
-  // If your FK is jobRequestId instead of requestId, change it below
-  const { count } = await prisma.callout.deleteMany({
-    where: { requestId: idNum },
-  });
-
-  return NextResponse.json({ ok: true, deleted: count });
+async function cancelById(id: number) {
+  await prisma.callout.deleteMany({ where: { requestId: id } });
+  try {
+    await prisma.jobRequest.update({ where: { id }, data: { /* status: "CANCELLED" as any */ } });
+  } catch { /* ignore if no status field */ }
 }
 
-export async function POST(_req: NextRequest, ctx: Ctx)   { return cancelById(ctx); }
-export async function DELETE(_req: NextRequest, ctx: Ctx) { return cancelById(ctx); }
-export async function OPTIONS() { return new Response(null, { status: 204 }); }
+export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const rid = Number(id);
+  if (!Number.isFinite(rid)) return NextResponse.json({ error: "Invalid request id" }, { status: 400 });
+
+  try {
+    const existing = await prisma.jobRequest.findUnique({ where: { id: rid } });
+    if (!existing) return NextResponse.json({ error: "Request not found" }, { status: 404 });
+
+    await cancelById(rid);
+    return NextResponse.json({ ok: true, id: rid });
+  } catch (err: any) {
+    return NextResponse.json({ error: "Server error", detail: String(err?.message ?? err) }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  return POST(_req, ctx);
+}

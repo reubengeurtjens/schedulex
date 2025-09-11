@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-
-type Ctx = { params: Promise<{ id: string }> };
-
-export async function GET(_req: NextRequest, ctx: Ctx) {
-  // 👇 params is a Promise in Next 15 – you must await it
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  const rid = Number(id);
+  if (!Number.isFinite(rid)) return NextResponse.json({ error: "Invalid request id" }, { status: 400 });
 
-  const idNum = Number(id);
-  if (!Number.isFinite(idNum)) {
-    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  try {
+    const request = await prisma.jobRequest.findUnique({ where: { id: rid }, include: { callouts: true } });
+    if (!request) return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    return NextResponse.json(request);
+  } catch (err: any) {
+    return NextResponse.json({ error: "Server error", detail: String(err?.message ?? err) }, { status: 500 });
   }
-
-  const item = await prisma.jobRequest.findUnique({
-    where: { id: idNum },
-    include: { callouts: true },
-  });
-
-  if (!item) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-
-  return NextResponse.json({ item });
 }

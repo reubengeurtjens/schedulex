@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-
-type Ctx = { params: Promise<{ id: string }> };
-
-export async function GET(_req: NextRequest, ctx: Ctx) {
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  const rid = Number(id);
+  if (!Number.isFinite(rid)) return NextResponse.json({ error: "Invalid request id" }, { status: 400 });
 
-  const idNum = Number(id);
-  if (!Number.isFinite(idNum)) {
-    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  try {
+    const callouts = await prisma.callout.findMany({ where: { requestId: rid } });
+    return NextResponse.json(callouts);
+  } catch (err: any) {
+    return NextResponse.json({ error: "Server error", detail: String(err?.message ?? err) }, { status: 500 });
   }
-
-  const callouts = await prisma.callout.findMany({
-    where: { requestId: idNum },
-    orderBy: { id: "asc" },
-  });
-
-  return NextResponse.json({ requestId: idNum, callouts });
 }
