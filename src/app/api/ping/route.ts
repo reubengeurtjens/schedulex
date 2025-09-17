@@ -1,6 +1,4 @@
-export const runtime = 'nodejs';
-import { NextResponse } from 'next/server';
-
+import { NextResponse } from "next/server";
 export async function GET() {
-  return NextResponse.json({ ok: true, time: new Date().toISOString() });
+  return NextResponse.json({ ok: true, ts: new Date().toISOString() });
 }
