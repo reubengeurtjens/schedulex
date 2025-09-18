@@ -16,15 +16,16 @@ export async function GET(req: NextRequest) {
   const limit = Number.isFinite(n) ? Math.min(Math.max(n, 1), 20) : 5;
 
   try {
-    // Minimal, stable shape
-    const callouts = await prisma.callout.findMany({
-      select: { id: true, providerId: true, requestId: true, status: true },
-      orderBy: { id: "asc" },
-      take: limit,
-    });
-    return NextResponse.json({ callouts });
+    // Raw SQL read to avoid schema/client drift
+    const rows = await prisma.$queryRaw<
+      { id: number; providerId: number | null; requestId: number | null; status: string | null }[]
+    >`SELECT "id","providerId","requestId","status" FROM "Callout" ORDER BY "id" ASC LIMIT ${limit}`;
+
+    return NextResponse.json({ callouts: rows });
   } catch (e: any) {
-    console.error("NEXT route error:", e);
-    return NextResponse.json({ error: "Server error", detail: String(e?.message ?? e) }, { status: 500 });
+    return NextResponse.json(
+      { error: "DB error (next)", detail: String(e?.message ?? e) },
+      { status: 500 }
+    );
   }
 }
