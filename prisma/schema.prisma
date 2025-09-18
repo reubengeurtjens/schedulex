@@ -1,16 +1,18 @@
+// ---------- Prisma Client (keep for Vercel Linux builds) ----------
 generator client {
   provider      = "prisma-client-js"
   // Ensures a Linux client is built during Vercel’s build
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
+// ---------- Database ----------
 datasource db {
   // Use Postgres on a hosted provider (Neon/Supabase/RDS/etc.)
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-
+// ---------- Enums ----------
 enum Role {
   USER
   ADMIN
@@ -24,69 +26,91 @@ enum RequestStatus {
 }
 
 enum CalloutStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
+  QUEUED
+  DIALING
+  CONNECTED
+  NO_ANSWER
+  BUSY
+  FAILED
   COMPLETED
 }
 
+// ---------- Models ----------
 model User {
-  id           Int          @id @default(autoincrement())
-  email        String       @unique
-  name         String?
-  passwordHash String?
-  role         Role         @default(USER)
-  requests     JobRequest[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-}
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  role      Role     @default(USER)
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model Provider {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String?   @unique
-  phone     String?
-  city      String?
-  timezone  String?
-  notes     String?
-  address   String?
-  website   String?
-  services  String?
-  category  String?
-  callouts  Callout[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([name])
-  @@index([city])
+  // Requests created by this user (optional)
+  requests JobRequest[]
 }
 
 model JobRequest {
-  id          Int           @id @default(autoincrement())
-  userId      Int
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category    String?
-  description String?
-  location    String?
-  status      RequestStatus @default(NEW)
-  callouts    Callout[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id          Int    @id @default(autoincrement())
+  category    String
+  description String
+  location    String
+
+  status    RequestStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Optional: link to the user who created it
+  createdById Int?
+  createdBy   User? @relation(fields: [createdById], references: [id])
+
+  Callouts Callout[]
+
+  @@index([status])
+  @@index([createdById])
+}
+
+model Provider {
+  id    Int    @id @default(autoincrement())
+  name  String
+  phone String @unique // E.164 (+614…); Make.com dials this
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Callouts Callout[]
 }
 
 model Callout {
-  id         Int           @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
+  // Links
   requestId  Int
-  request    JobRequest    @relation(fields: [requestId], references: [id], onDelete: Cascade)
   providerId Int
-  provider   Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  startTime  DateTime?
-  endTime    DateTime?
-  status     CalloutStatus @default(PENDING)
-  notes      String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  JobRequest JobRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  Provider   Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  // Status machine for the outreach
+  status CalloutStatus @default(QUEUED)
+
+  // Optional scheduling if you later auto-run via cron
+  scheduledAt DateTime?
+
+  // Artifacts coming back from Make.com
+  recordingUrl      String?
+  transcript        String?
+  earliestQuoteTime DateTime? // if you parse to a real timestamp; otherwise store in notes
+  calloutFee        Decimal?  @db.Decimal(10, 2)
+  notes             String?
+
+  // Optional cache of the dialed number (useful if provider.phone changes)
+  toPhone String?
+
+  // If you ever integrate Twilio/another dialer, keep this generic
+  externalCallId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([requestId])
   @@index([providerId])
+  @@index([status, scheduledAt])
 }
