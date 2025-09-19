@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
 export const dynamic = "force-dynamic";
 
 function auth(req: NextRequest) {
@@ -16,16 +15,11 @@ export async function GET(req: NextRequest) {
   const limit = Number.isFinite(n) ? Math.min(Math.max(n, 1), 20) : 5;
 
   try {
-    // Raw SQL read to avoid schema/client drift
     const rows = await prisma.$queryRaw<
       { id: number; providerId: number | null; requestId: number | null; status: string | null }[]
     >`SELECT "id","providerId","requestId","status" FROM "Callout" ORDER BY "id" ASC LIMIT ${limit}`;
-
     return NextResponse.json({ callouts: rows });
   } catch (e: any) {
-    return NextResponse.json(
-      { error: "DB error (next)", detail: String(e?.message ?? e) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "DB error (next)", detail: String(e?.message ?? e) }, { status: 500 });
   }
 }
