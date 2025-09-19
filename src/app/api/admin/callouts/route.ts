@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
 
   if (wantLists) {
     const [providers, requests] = await Promise.all([
-      prisma.provider.findMany({
-        orderBy: { name: "asc" },
-        select: { id: true, name: true, email: true, phone: true, city: true },
-      }),
+      prisma.provider.findMany({ orderBy: { name: "asc" } }),
       prisma.jobRequest.findMany({
         orderBy: { createdAt: "desc" },
         take,
@@ -109,3 +106,4 @@ export async function POST(req: NextRequest) {
 
   return okNoStore({ callout }, 201);
 }
+
