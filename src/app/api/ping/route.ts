@@ -10,32 +10,26 @@ export async function GET(req: NextRequest) {
 
   if (debug) {
     try {
-      const now = await prisma.$queryRaw<{ now: Date }[]>`SELECT NOW() as now`;
-
       const present = await prisma.$queryRaw<
         { callout: string | null; job: string | null; prov: string | null }[]
       >`SELECT to_regclass('"Callout"') as callout,
                to_regclass('"JobRequest"') as job,
                to_regclass('"Provider"')  as prov`;
 
-      let calloutCount = 0, jobCount = 0, providerCount = 0;
-      try {
-        const r1 = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "Callout"`;
-        calloutCount = Number(r1[0]?.count ?? 0);
-      } catch {}
-      try {
-        const r2 = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "JobRequest"`;
-        jobCount = Number(r2[0]?.count ?? 0);
-      } catch {}
-      try {
-        const r3 = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "Provider"`;
-        providerCount = Number(r3[0]?.count ?? 0);
-      } catch {}
+      const c1 = await prisma.$queryRaw<{ count: bigint }[]>
+        `SELECT COUNT(*)::bigint AS count FROM "Callout"`;
+      const c2 = await prisma.$queryRaw<{ count: bigint }[]>
+        `SELECT COUNT(*)::bigint AS count FROM "JobRequest"`;
+      const c3 = await prisma.$queryRaw<{ count: bigint }[]>
+        `SELECT COUNT(*)::bigint AS count FROM "Provider"`;
 
       payload.db = {
-        now: now[0]?.now,
         present: present[0],
-        counts: { Callout: calloutCount, JobRequest: jobCount, Provider: providerCount },
+        counts: {
+          Callout: Number(c1[0]?.count ?? 0),
+          JobRequest: Number(c2[0]?.count ?? 0),
+          Provider: Number(c3[0]?.count ?? 0),
+        },
       };
     } catch (e: any) {
       payload.error = String(e?.message ?? e);
@@ -44,3 +38,4 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(payload);
 }
+  
