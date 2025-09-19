@@ -69,15 +69,16 @@ model JobRequest {
 }
 
 model Provider {
-  id    Int    @id @default(autoincrement())
-  name  String
-  phone String @unique // E.164 (+614…); Make.com dials this
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Callouts Callout[]
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String    @unique
+  email     String?   // <— add
+  city      String?   // <— add
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  callouts  Callout[]
 }
+
 
 model Callout {
   id Int @id @default(autoincrement())
