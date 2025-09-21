@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 
   if (wantLists) {
     const [providers, requests] = await Promise.all([
-      prisma.provider.findMany({ orderBy: { name: "asc" } }),
+      prisma.provider.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, phone: true } }),
       prisma.jobRequest.findMany({
         orderBy: { createdAt: "desc" },
         take,
