@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-
 export const dynamic = 'force-dynamic';
+// BUILD_STAMP: SEARCH_DIAG_20250921_145743
 
 type SearchKind = 'providers' | 'requests';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-
   const kind = ((searchParams.get('kind') ?? 'providers') as SearchKind);
   const q = (searchParams.get('q') ?? '').trim();
 
@@ -17,16 +16,15 @@ export async function GET(req: NextRequest) {
 
   try {
     if (kind === 'requests') {
-      const where =
-        q
-          ? {
-              OR: [
-                { category: { contains: q, mode: 'insensitive' as const } },
-                { description: { contains: q, mode: 'insensitive' as const } },
-                { location: { contains: q, mode: 'insensitive' as const } },
-              ],
-            }
-          : {};
+      const where = q
+        ? {
+            OR: [
+              { category: { contains: q, mode: 'insensitive' as const } },
+              { description: { contains: q, mode: 'insensitive' as const } },
+              { location: { contains: q, mode: 'insensitive' as const } },
+            ],
+          }
+        : {};
 
       const [items, total] = await Promise.all([
         prisma.jobRequest.findMany({
@@ -34,14 +32,7 @@ export async function GET(req: NextRequest) {
           orderBy: { createdAt: 'desc' },
           take,
           skip,
-          select: {
-            id: true,
-            category: true,
-            description: true,
-            location: true,
-            status: true,
-            createdAt: true,
-          },
+          select: { id: true, category: true, description: true, location: true, status: true, createdAt: true },
         }),
         prisma.jobRequest.count({ where }),
       ]);
@@ -50,15 +41,14 @@ export async function GET(req: NextRequest) {
     }
 
     // default: providers
-    const where =
-      q
-        ? {
-            OR: [
-              { name: { contains: q, mode: 'insensitive' as const } },
-              { phone: { contains: q } },
-            ],
-          }
-        : {};
+    const where = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { phone: { contains: q } },
+          ],
+        }
+      : {};
 
     const [items, total] = await Promise.all([
       prisma.provider.findMany({
@@ -66,11 +56,7 @@ export async function GET(req: NextRequest) {
         orderBy: { id: 'desc' },
         take,
         skip,
-        select: {
-          id: true,
-          name: true,
-          phone: true
-        },
+        select: { id: true, name: true, phone: true },
       }),
       prisma.provider.count({ where }),
     ]);
