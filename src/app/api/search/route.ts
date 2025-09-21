@@ -32,9 +32,9 @@ export async function GET(_req: Request): Promise<Response> {
         select: {
           id: true,
           name: true,
-          email: true,
+          ,
           phone: true,
-          city: true,
+          ,
         },
       }),
       prisma.provider.count({ where }),
@@ -48,3 +48,4 @@ export async function GET(_req: Request): Promise<Response> {
     );
   }
 }
+

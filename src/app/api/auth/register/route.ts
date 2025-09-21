@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         passwordHash: hashed, // <-- correct field
         // role defaults to USER via schema
       },
-      select: { id: true, email: true, name: true, createdAt: true },
+      select: { id: true, , name: true, createdAt: true },
     });
 
     return Response.json({ user }, { status: 201 });
@@ -45,3 +45,4 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "register_failed", detail: String(e?.message ?? e) }, { status: 500 });
   }
 }
+

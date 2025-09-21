@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const email = cleanEmail(parsed.data.email);
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true, name: true, passwordHash: true, createdAt: true },
+    select: { id: true, , name: true, passwordHash: true, createdAt: true },
   });
 
   if (!user || !user.passwordHash) {
@@ -37,3 +37,4 @@ export async function POST(req: NextRequest) {
   const { passwordHash, ...publicUser } = user;
   return Response.json({ user: publicUser }, { status: 200 });
 }
+
