@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
-// BUILD_STAMP: SEARCH_DIAG_20250921_145743
+// STAMP: FIX_20250921_150205
 
 type SearchKind = 'providers' | 'requests';
 
@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
   const kind = ((searchParams.get('kind') ?? 'providers') as SearchKind);
   const q = (searchParams.get('q') ?? '').trim();
 
-  const take = Math.min(Math.max(parseInt(searchParams.get('take') ?? '20', 10), 1), 100);
-  const page = Math.max(parseInt(searchParams.get('page') ?? '1', 10), 1);
+  const take = Math.min(Math.max(Number(searchParams.get('take') ?? '20'), 1), 100);
+  const page = Math.max(Number(searchParams.get('page') ?? '1'), 1);
   const skip = (page - 1) * take;
 
   try {
@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
       const where = q
         ? {
             OR: [
-              { category: { contains: q, mode: 'insensitive' as const } },
-              { description: { contains: q, mode: 'insensitive' as const } },
-              { location: { contains: q, mode: 'insensitive' as const } },
+              { category: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
+              { location: { contains: q, mode: 'insensitive' } },
             ],
           }
         : {};
@@ -40,11 +40,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: true, kind, items, total, take, skip });
     }
 
-    // default: providers
+    // default: providers (no email/city)
     const where = q
       ? {
           OR: [
-            { name: { contains: q, mode: 'insensitive' as const } },
+            { name: { contains: q, mode: 'insensitive' } },
             { phone: { contains: q } },
           ],
         }
