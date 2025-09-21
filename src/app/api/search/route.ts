@@ -1,51 +1,43 @@
-// src/app/api/providers/search/route.ts
-import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-export const runtime = "nodejs";
+export const dynamic = 'force-dynamic';
 
-export async function GET(_req: Request): Promise<Response> {
-  try {
-    const url = new URL(_req.url);
-    const q = (url.searchParams.get("q") ?? "").trim();
-    const take = Math.min(Number(url.searchParams.get("take") ?? "50"), 100);
-    const skip = Math.max(Number(url.searchParams.get("skip") ?? "0"), 0);
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
 
-    const where: Prisma.ProviderWhereInput = q
+  const q = (searchParams.get('q') ?? '').trim();
+  const take = Math.min(Math.max(Number(searchParams.get('take') ?? '20'), 1), 100);
+  const page = Math.max(Number(searchParams.get('page') ?? '1'), 1);
+  const skip = (page - 1) * take;
+
+  const where =
+    q.length > 0
       ? {
           OR: [
-            { name:  { contains: q, mode: "insensitive" } },
-            { email: { contains: q, mode: "insensitive" } },
-            { phone: { contains: q, mode: "insensitive" } },
-            { city:  { contains: q, mode: "insensitive" } },
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { phone: { contains: q } },
           ],
         }
       : {};
 
+  try {
     const [items, total] = await Promise.all([
       prisma.provider.findMany({
         where,
-        orderBy: { id: "desc" },
+        orderBy: { id: 'desc' },
         take,
         skip,
-        select: {
-          id: true,
-          name: true,
-          ,
-          phone: true,
-          ,
-        },
+        select: { id: true, name: true, phone: true }, // <-- SAFE fields only
       }),
       prisma.provider.count({ where }),
     ]);
 
-    return NextResponse.json({ items, total, take, skip });
+    return NextResponse.json({ ok: true, items, total, take, skip });
   } catch (err: any) {
     return NextResponse.json(
-      { error: "search_failed", detail: err?.message ?? String(err) },
-      { status: 500 }
+      { ok: false, error: 'search_failed', detail: err?.message ?? String(err) },
+      { status: 500 },
     );
   }
 }
-
