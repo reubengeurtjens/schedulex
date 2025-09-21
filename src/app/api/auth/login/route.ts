@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -6,7 +7,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     token: null,
-    message: 'Login endpoint is disabled in this build.',
+    message: 'Login endpoint disabled in this build.',
     received: body,
   });
 }
